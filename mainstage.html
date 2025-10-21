@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Agenda Timer - Display</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="main-stage">
+    <div class="display-container">
+        <!-- Agenda Display -->
+        <div class="agenda-display">
+            <h2>Meeting Agenda</h2>
+            <div id="agenda-items-display"></div>
+        </div>
+
+        <!-- Current Agenda Timer -->
+        <div class="timer-display agenda-timer">
+            <h3>Current Item</h3>
+            <div id="current-item-name">-</div>
+            <div id="agenda-timer" class="big-timer">00:00</div>
+            <div id="agenda-status" class="status"></div>
+        </div>
+
+        <!-- Speaker Timer -->
+        <div class="timer-display speaker-timer">
+            <h3>Speaker Timer</h3>
+            <div id="speaker-timer" class="big-timer">00:00</div>
+            <div id="speaker-status" class="status"></div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/meetjs/addons/1.1.0/meet.addons.js"></script>
+    <script src="mainstage.js"></script>
+</body>
+</html>

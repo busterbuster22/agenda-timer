@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Agenda Timer - Side Panel</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="side-panel">
+        <h2>Agenda Timer Control Panel</h2>
+        
+        <!-- Agenda Management -->
+        <div class="section">
+            <h3>Agenda Items</h3>
+            <div id="agenda-list"></div>
+            <div class="add-agenda">
+                <input type="text" id="new-agenda-item" placeholder="New agenda item">
+                <input type="number" id="agenda-duration" placeholder="Minutes" min="1" value="5">
+                <button onclick="addAgendaItem()">Add Item</button>
+            </div>
+        </div>
+
+        <!-- Agenda Timer Controls -->
+        <div class="section">
+            <h3>Current Agenda Timer</h3>
+            <div id="current-agenda-display">No item selected</div>
+            <div class="timer-controls">
+                <button onclick="startAgendaTimer()">Start</button>
+                <button onclick="pauseAgendaTimer()">Pause</button>
+                <button onclick="stopAgendaTimer()">Stop</button>
+                <button onclick="nextAgendaItem()">Next Item</button>
+            </div>
+        </div>
+
+        <!-- Speaker Timer Controls -->
+        <div class="section">
+            <h3>Speaker Timer</h3>
+            <div id="speaker-timer-display">00:00</div>
+            <div class="timer-controls">
+                <button onclick="startSpeakerTimer()">Start</button>
+                <button onclick="pauseSpeakerTimer()">Pause</button>
+                <button onclick="stopSpeakerTimer()">Stop/Reset</button>
+            </div>
+        </div>
+
+        <!-- Launch Main Stage -->
+        <div class="section">
+            <button id="start-activity" class="primary-button">Show Timers to All Participants</button>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/meetjs/addons/1.1.0/meet.addons.js"></script>
+    <script src="sidepanel.js"></script>
+</body>
+</html>

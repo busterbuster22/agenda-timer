@@ -1,0 +1,15 @@
+{
+  "name": "agenda-timer",
+  "version": "1.0.0",
+  "description": "Agenda and timer tracker for Google Meet",
+  "main": "index.js",
+  "scripts": {
+    "start": "npx http-server . -p 8080"
+  },
+  "dependencies": {
+    "@googleworkspace/meet-addons": "^1.1.0"
+  },
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}

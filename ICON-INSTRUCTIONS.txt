@@ -1,0 +1,27 @@
+ICON REQUIREMENTS FOR GOOGLE MEET ADD-ON
+
+You need to create an icon.png file (128x128 pixels) for your add-on.
+
+OPTION 1: Use an online tool
+- Go to https://www.canva.com/ (free)
+- Create a 128x128px design
+- Add a clock/timer icon or text
+- Download as PNG named "icon.png"
+- Put it in this folder
+
+OPTION 2: Use a simple icon
+- Find a free icon at https://www.flaticon.com/
+- Search for "timer" or "clock"
+- Download as 128x128 PNG
+- Rename to "icon.png"
+- Put it in this folder
+
+OPTION 3: Create one yourself
+- Use any image editor
+- 128 x 128 pixels
+- Simple design (looks good when small)
+- Save as icon.png
+
+Once you have icon.png in this folder, update the deployment JSON 
+in Google Cloud Console to point to:
+https://YOUR-DEPLOYED-URL/icon.png

@@ -1,0 +1,15 @@
+{
+  "oauthScopes": [],
+  "addOns": {
+    "meet": {
+      "sidePanelUrl": "https://YOUR-DEPLOYED-URL/sidepanel.html",
+      "mainStageUrl": "https://YOUR-DEPLOYED-URL/mainstage.html",
+      "supportsAddonActivation": true
+    },
+    "common": {
+      "name": "Agenda Timer",
+      "logoUrl": "https://YOUR-DEPLOYED-URL/icon.png",
+      "useLocaleFromApp": true
+    }
+  }
+}
