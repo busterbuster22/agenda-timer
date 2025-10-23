@@ -7,7 +7,10 @@ let meetingState = {
     agendaTimerState: 'stopped',
     agendaTimeRemaining: 0,
     speakerTimerState: 'stopped',
-    speakerTimeElapsed: 0
+    speakerTimeElapsed: 0,
+    meetingStartTime: null,
+    meetingEndTime: null,
+    meetingElapsedSeconds: 0
 };
 
 // Initialize the main stage
@@ -52,11 +55,50 @@ function loadStateFromStorage() {
         }
     }
 }
+
 // Update all displays
 function updateDisplay() {
     renderAgendaDisplay();
     updateAgendaTimerDisplay();
     updateSpeakerTimerDisplay();
+    updateMeetingTimeDisplay();
+}
+
+// Update meeting time display
+function updateMeetingTimeDisplay() {
+    const container = document.getElementById('meeting-time-container');
+    
+    if (!meetingState.meetingStartTime || !meetingState.meetingEndTime) {
+        container.style.display = 'none';
+        return;
+    }
+    
+    container.style.display = 'block';
+    
+    const elapsed = meetingState.meetingElapsedSeconds;
+    const totalDuration = Math.floor((meetingState.meetingEndTime - meetingState.meetingStartTime) / 1000);
+    const remaining = Math.max(0, totalDuration - elapsed);
+    
+    const elapsedStr = formatTime(elapsed);
+    const remainingStr = formatTime(remaining);
+    const endTimeStr = new Date(meetingState.meetingEndTime).toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: true 
+    });
+    
+    document.getElementById('meeting-elapsed').textContent = elapsedStr;
+    document.getElementById('meeting-remaining').textContent = remainingStr;
+    document.getElementById('meeting-end-time').textContent = endTimeStr;
+    
+    // Apply warning/danger classes
+    const remainingElement = document.getElementById('meeting-remaining');
+    remainingElement.classList.remove('warning', 'danger');
+    if (remaining === 0) {
+        remainingElement.classList.add('danger');
+    } else if (remaining < 300) { // Less than 5 minutes
+        remainingElement.classList.add('warning');
+    }
 }
 
 // Render agenda items
@@ -78,10 +120,39 @@ function renderAgendaDisplay() {
             statusClass = 'upcoming';
         }
         
+        const allocatedSeconds = item.durationMinutes * 60;
+        const usedSeconds = item.timeUsedSeconds || 0;
+        const remainingSeconds = Math.max(0, allocatedSeconds - usedSeconds);
+        const isOvertime = usedSeconds > allocatedSeconds;
+        
+        const usedStr = formatTime(usedSeconds);
+        const remainingStr = formatTime(remainingSeconds);
+        const overtimeStr = isOvertime ? formatTime(usedSeconds - allocatedSeconds) : '';
+        
+        let progressPercentage = Math.min(100, (usedSeconds / allocatedSeconds) * 100);
+        let progressClass = '';
+        if (isOvertime) {
+            progressClass = 'overtime';
+            progressPercentage = 100;
+        } else if (remainingSeconds < 60) {
+            progressClass = 'warning';
+        }
+        
         return `
             <div class="display-agenda-item ${statusClass}">
-                <span>${item.name}</span>
-                <span>${item.durationMinutes} min</span>
+                <div class="agenda-item-header">
+                    <span class="agenda-item-name">${item.name}</span>
+                    <span class="agenda-item-allocated">${item.durationMinutes} min</span>
+                </div>
+                <div class="agenda-item-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill ${progressClass}" style="width: ${progressPercentage}%"></div>
+                    </div>
+                    <div class="agenda-item-times">
+                        <span class="time-label">Used: <strong class="${isOvertime ? 'danger' : ''}">${usedStr}</strong></span>
+                        <span class="time-label">Left: <strong class="${isOvertime ? 'danger' : (remainingSeconds < 60 ? 'warning' : '')}">${isOvertime ? '-' + overtimeStr : remainingStr}</strong></span>
+                    </div>
+                </div>
             </div>
         `;
     }).join('');
@@ -102,17 +173,17 @@ function updateAgendaTimerDisplay() {
     }
     
     // Update timer
-    const minutes = Math.floor(meetingState.agendaTimeRemaining / 60);
-    const seconds = meetingState.agendaTimeRemaining % 60;
-    const timeString = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    const minutes = Math.floor(Math.abs(meetingState.agendaTimeRemaining) / 60);
+    const seconds = Math.abs(meetingState.agendaTimeRemaining) % 60;
+    const timeString = `${meetingState.agendaTimeRemaining < 0 ? '-' : ''}${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     timerDisplay.textContent = timeString;
     
     // Apply warning/danger colors
     timerDisplay.classList.remove('warning', 'danger');
-    if (meetingState.agendaTimeRemaining <= 60 && meetingState.agendaTimeRemaining > 0) {
-        timerDisplay.classList.add('warning');
-    } else if (meetingState.agendaTimeRemaining === 0) {
+    if (meetingState.agendaTimeRemaining < 0) {
         timerDisplay.classList.add('danger');
+    } else if (meetingState.agendaTimeRemaining <= 60 && meetingState.agendaTimeRemaining > 0) {
+        timerDisplay.classList.add('warning');
     }
     
     // Update status
@@ -139,9 +210,7 @@ function updateSpeakerTimerDisplay() {
     const statusDisplay = document.getElementById('speaker-status');
     
     // Update timer
-    const minutes = Math.floor(meetingState.speakerTimeElapsed / 60);
-    const seconds = meetingState.speakerTimeElapsed % 60;
-    const timeString = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    const timeString = formatTime(meetingState.speakerTimeElapsed);
     timerDisplay.textContent = timeString;
     
     // Apply warning colors for long speakers (over 3 minutes)
@@ -168,6 +237,13 @@ function updateSpeakerTimerDisplay() {
             statusDisplay.classList.add('stopped');
             break;
     }
+}
+
+// Utility function
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
 // Initialize when page loads

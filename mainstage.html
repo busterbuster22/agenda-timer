@@ -1,35 +1,60 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Agenda Timer - Display</title>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda Timer - Display</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://www.gstatic.com/meet/addons/1.1.0/meet.addons.js"></script>
 </head>
-<body class="main-stage">
-    <div class="display-container">
-        <!-- Agenda Display -->
-        <div class="agenda-display">
-            <h2>Meeting Agenda</h2>
-            <div id="agenda-items-display"></div>
+<body class="screenshare-mode">
+    <div class="main-stage-container">
+        <h1>Agenda Timer</h1>
+        
+        <!-- Meeting Time Display -->
+        <div id="meeting-time-container" class="meeting-time-section" style="display: none;">
+            <h2>Meeting Progress</h2>
+            <div class="meeting-time-grid">
+                <div class="time-item">
+                    <div class="time-label">Elapsed</div>
+                    <div id="meeting-elapsed" class="time-value">00:00</div>
+                </div>
+                <div class="time-item">
+                    <div class="time-label">Remaining</div>
+                    <div id="meeting-remaining" class="time-value">00:00</div>
+                </div>
+                <div class="time-item">
+                    <div class="time-label">Scheduled End</div>
+                    <div id="meeting-end-time" class="time-value">--:--</div>
+                </div>
+            </div>
         </div>
-
-        <!-- Current Agenda Timer -->
-        <div class="timer-display agenda-timer">
-            <h3>Current Item</h3>
-            <div id="current-item-name">-</div>
-            <div id="agenda-timer" class="big-timer">00:00</div>
-            <div id="agenda-status" class="status"></div>
+        
+        <!-- Current Timers Section -->
+        <div class="timers-section">
+            <div class="timer-card">
+                <h2>Current Agenda Item</h2>
+                <div id="current-item-name" class="current-item-name">-</div>
+                <div id="agenda-timer" class="large-timer">00:00</div>
+                <div id="agenda-status" class="status">Stopped</div>
+            </div>
+            
+            <div class="timer-card">
+                <h2>Speaker Timer</h2>
+                <div id="speaker-timer" class="large-timer">00:00</div>
+                <div id="speaker-status" class="status">Ready</div>
+            </div>
         </div>
-
-        <!-- Speaker Timer -->
-        <div class="timer-display speaker-timer">
-            <h3>Speaker Timer</h3>
-            <div id="speaker-timer" class="big-timer">00:00</div>
-            <div id="speaker-status" class="status"></div>
+        
+        <!-- Agenda Items List -->
+        <div class="agenda-section">
+            <h2>Agenda</h2>
+            <div id="agenda-items-display" class="agenda-items-display">
+                <!-- Agenda items will be rendered here -->
+            </div>
         </div>
     </div>
-
-    <script src="https://www.gstatic.com/meetjs/addons/1.1.0/meet.addons.js"></script>
+    
     <script src="mainstage.js"></script>
 </body>
 </html>

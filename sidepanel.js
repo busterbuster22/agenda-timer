@@ -7,16 +7,19 @@ let meetingState = {
     agendaTimerState: 'stopped', // 'stopped', 'running', 'paused'
     agendaTimeRemaining: 0,
     speakerTimerState: 'stopped',
-    speakerTimeElapsed: 0
+    speakerTimeElapsed: 0,
+    meetingStartTime: null,
+    meetingEndTime: null,
+    meetingElapsedSeconds: 0
 };
 
 let agendaTimerInterval;
 let speakerTimerInterval;
+let meetingTimerInterval;
 
 // Initialize the add-on
 async function initializeSidePanel() {
     try {
-        // Replace 'YOUR_CLOUD_PROJECT_NUMBER' with your actual Google Cloud project number
         const session = await meet.addon.createAddonSession({
             cloudProjectNumber: '879397453091'
         });
@@ -24,9 +27,9 @@ async function initializeSidePanel() {
         sidePanelClient = await session.createSidePanelClient();
         
         console.log('Side panel initialized');
-
+        
         // Start broadcasting state updates
-        startStateBroadcast();  
+        startStateBroadcast();
         
         // Set up the button to launch the main stage
         document.getElementById('start-activity').addEventListener('click', async () => {
@@ -36,6 +39,11 @@ async function initializeSidePanel() {
         // Load saved agenda items from localStorage
         loadAgendaFromStorage();
         renderAgendaList();
+        
+        // Start meeting timer if meeting has started
+        if (meetingState.meetingStartTime) {
+            startMeetingTimer();
+        }
         
     } catch (error) {
         console.error('Failed to initialize side panel:', error);
@@ -58,7 +66,6 @@ async function startMainStage() {
     }
 }
 
-// Broadcast state updates to main stage
 // Broadcast state updates to main stage via localStorage
 function broadcastState() {
     // Save to localStorage so mainstage can read it
@@ -75,10 +82,87 @@ function broadcastState() {
 function startStateBroadcast() {
     // Broadcast state every second when timers are running
     setInterval(() => {
-        if (meetingState.agendaTimerState === 'running' || meetingState.speakerTimerState === 'running') {
+        if (meetingState.agendaTimerState === 'running' || 
+            meetingState.speakerTimerState === 'running' ||
+            meetingState.meetingStartTime) {
             broadcastState();
         }
     }, 1000);
+}
+
+// Meeting Time Management
+function setMeetingTime() {
+    const startInput = document.getElementById('meeting-start-time');
+    const endInput = document.getElementById('meeting-end-time');
+    
+    if (startInput.value && endInput.value) {
+        const now = new Date();
+        const startTime = new Date(now.toDateString() + ' ' + startInput.value);
+        const endTime = new Date(now.toDateString() + ' ' + endInput.value);
+        
+        if (endTime <= startTime) {
+            alert('End time must be after start time');
+            return;
+        }
+        
+        meetingState.meetingStartTime = startTime.getTime();
+        meetingState.meetingEndTime = endTime.getTime();
+        meetingState.meetingElapsedSeconds = 0;
+        
+        startMeetingTimer();
+        updateMeetingTimeDisplay();
+        broadcastState();
+        saveAgendaToStorage();
+    }
+}
+
+function startMeetingTimer() {
+    if (meetingTimerInterval) {
+        clearInterval(meetingTimerInterval);
+    }
+    
+    meetingTimerInterval = setInterval(() => {
+        if (meetingState.meetingStartTime) {
+            const now = Date.now();
+            meetingState.meetingElapsedSeconds = Math.floor((now - meetingState.meetingStartTime) / 1000);
+            updateMeetingTimeDisplay();
+            broadcastState();
+        }
+    }, 1000);
+}
+
+function updateMeetingTimeDisplay() {
+    const display = document.getElementById('meeting-time-display');
+    
+    if (!meetingState.meetingStartTime || !meetingState.meetingEndTime) {
+        display.innerHTML = '<span style="color: #5f6368;">Set meeting times above</span>';
+        return;
+    }
+    
+    const elapsed = meetingState.meetingElapsedSeconds;
+    const totalDuration = Math.floor((meetingState.meetingEndTime - meetingState.meetingStartTime) / 1000);
+    const remaining = Math.max(0, totalDuration - elapsed);
+    
+    const elapsedStr = formatTime(elapsed);
+    const remainingStr = formatTime(remaining);
+    const endTimeStr = new Date(meetingState.meetingEndTime).toLocaleTimeString('en-US', { 
+        hour: '2-digit', 
+        minute: '2-digit',
+        hour12: true 
+    });
+    
+    let statusClass = '';
+    if (remaining === 0) {
+        statusClass = 'danger';
+    } else if (remaining < 300) { // Less than 5 minutes
+        statusClass = 'warning';
+    }
+    
+    display.innerHTML = `
+        <div>Elapsed: <strong>${elapsedStr}</strong></div>
+        <div>Remaining: <strong class="${statusClass}">${remainingStr}</strong></div>
+        <div>End time: <strong>${endTimeStr}</strong></div>
+    `;
 }
 
 // Agenda Management
@@ -98,7 +182,9 @@ function addAgendaItem() {
         id: Date.now(),
         name: name,
         durationMinutes: duration,
-        completed: false
+        completed: false,
+        timeUsedSeconds: 0,
+        startedAt: null
     });
     
     nameInput.value = '';
@@ -116,12 +202,52 @@ function removeAgendaItem(id) {
     broadcastState();
 }
 
+function moveAgendaItemUp(index) {
+    if (index > 0) {
+        const items = meetingState.agendaItems;
+        [items[index - 1], items[index]] = [items[index], items[index - 1]];
+        
+        // Update currentAgendaIndex if needed
+        if (meetingState.currentAgendaIndex === index) {
+            meetingState.currentAgendaIndex = index - 1;
+        } else if (meetingState.currentAgendaIndex === index - 1) {
+            meetingState.currentAgendaIndex = index;
+        }
+        
+        saveAgendaToStorage();
+        renderAgendaList();
+        broadcastState();
+    }
+}
+
+function moveAgendaItemDown(index) {
+    if (index < meetingState.agendaItems.length - 1) {
+        const items = meetingState.agendaItems;
+        [items[index], items[index + 1]] = [items[index + 1], items[index]];
+        
+        // Update currentAgendaIndex if needed
+        if (meetingState.currentAgendaIndex === index) {
+            meetingState.currentAgendaIndex = index + 1;
+        } else if (meetingState.currentAgendaIndex === index + 1) {
+            meetingState.currentAgendaIndex = index;
+        }
+        
+        saveAgendaToStorage();
+        renderAgendaList();
+        broadcastState();
+    }
+}
+
 function selectAgendaItem(index) {
+    // Stop timing the previous item if it was running
+    if (meetingState.currentAgendaIndex >= 0 && meetingState.agendaTimerState === 'running') {
+        stopAgendaTimer();
+    }
+    
     meetingState.currentAgendaIndex = index;
     const item = meetingState.agendaItems[index];
-    meetingState.agendaTimeRemaining = item.durationMinutes * 60;
+    meetingState.agendaTimeRemaining = (item.durationMinutes * 60) - item.timeUsedSeconds;
     
-    stopAgendaTimer();
     renderAgendaList();
     updateAgendaTimerDisplay();
     broadcastState();
@@ -131,6 +257,7 @@ function nextAgendaItem() {
     // Mark current as completed
     if (meetingState.currentAgendaIndex >= 0) {
         meetingState.agendaItems[meetingState.currentAgendaIndex].completed = true;
+        stopAgendaTimer();
     }
     
     // Move to next
@@ -154,15 +281,30 @@ function renderAgendaList() {
         const isActive = index === meetingState.currentAgendaIndex;
         const statusClass = item.completed ? 'completed' : (isActive ? 'active' : '');
         
+        const allocatedSeconds = item.durationMinutes * 60;
+        const usedSeconds = item.timeUsedSeconds;
+        const remainingSeconds = Math.max(0, allocatedSeconds - usedSeconds);
+        const isOvertime = usedSeconds > allocatedSeconds;
+        
+        const usedStr = formatTime(usedSeconds);
+        const remainingStr = formatTime(remainingSeconds);
+        const overtimeStr = isOvertime ? formatTime(usedSeconds - allocatedSeconds) : '';
+        
         return `
             <div class="agenda-item ${statusClass}">
-                <div class="agenda-item-content">
+                <div class="agenda-item-header">
                     <div class="agenda-item-name">${item.name}</div>
-                    <div class="agenda-item-duration">${item.durationMinutes} minutes</div>
+                    <div class="agenda-item-controls">
+                        <button class="small secondary" onclick="moveAgendaItemUp(${index})" ${index === 0 ? 'disabled' : ''}>↑</button>
+                        <button class="small secondary" onclick="moveAgendaItemDown(${index})" ${index === meetingState.agendaItems.length - 1 ? 'disabled' : ''}>↓</button>
+                        <button class="small secondary" onclick="selectAgendaItem(${index})">Select</button>
+                        <button class="small danger" onclick="removeAgendaItem(${item.id})">✕</button>
+                    </div>
                 </div>
-                <div class="agenda-item-controls">
-                    <button class="small secondary" onclick="selectAgendaItem(${index})">Select</button>
-                    <button class="small danger" onclick="removeAgendaItem(${item.id})">✕</button>
+                <div class="agenda-item-times">
+                    <span>Allocated: ${item.durationMinutes} min</span>
+                    <span>Used: <strong class="${isOvertime ? 'danger' : ''}">${usedStr}</strong></span>
+                    <span>Remaining: <strong class="${isOvertime ? 'danger' : (remainingSeconds < 60 ? 'warning' : '')}">${isOvertime ? '-' + overtimeStr : remainingStr}</strong></span>
                 </div>
             </div>
         `;
@@ -176,17 +318,28 @@ function startAgendaTimer() {
         return;
     }
     
+    const currentItem = meetingState.agendaItems[meetingState.currentAgendaIndex];
+    if (!currentItem.startedAt) {
+        currentItem.startedAt = Date.now();
+    }
+    
     meetingState.agendaTimerState = 'running';
     
     agendaTimerInterval = setInterval(() => {
+        const currentItem = meetingState.agendaItems[meetingState.currentAgendaIndex];
+        
         if (meetingState.agendaTimeRemaining > 0) {
             meetingState.agendaTimeRemaining--;
-            updateAgendaTimerDisplay();
-            broadcastState();
+            currentItem.timeUsedSeconds++;
         } else {
-            stopAgendaTimer();
-            alert('Agenda item time is up!');
+            // Keep counting into overtime
+            currentItem.timeUsedSeconds++;
         }
+        
+        updateAgendaTimerDisplay();
+        renderAgendaList();
+        broadcastState();
+        saveAgendaToStorage();
     }, 1000);
     
     updateAgendaTimerDisplay();
@@ -205,7 +358,7 @@ function stopAgendaTimer() {
     
     if (meetingState.currentAgendaIndex >= 0) {
         const item = meetingState.agendaItems[meetingState.currentAgendaIndex];
-        meetingState.agendaTimeRemaining = item.durationMinutes * 60;
+        meetingState.agendaTimeRemaining = (item.durationMinutes * 60) - item.timeUsedSeconds;
     }
     
     updateAgendaTimerDisplay();
@@ -221,9 +374,9 @@ function updateAgendaTimerDisplay() {
     }
     
     const item = meetingState.agendaItems[meetingState.currentAgendaIndex];
-    const minutes = Math.floor(meetingState.agendaTimeRemaining / 60);
-    const seconds = meetingState.agendaTimeRemaining % 60;
-    const timeString = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    const minutes = Math.floor(Math.abs(meetingState.agendaTimeRemaining) / 60);
+    const seconds = Math.abs(meetingState.agendaTimeRemaining) % 60;
+    const timeString = `${meetingState.agendaTimeRemaining < 0 ? '-' : ''}${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     
     display.textContent = `${item.name} - ${timeString}`;
 }
@@ -258,22 +411,47 @@ function stopSpeakerTimer() {
 
 function updateSpeakerTimerDisplay() {
     const display = document.getElementById('speaker-timer-display');
-    const minutes = Math.floor(meetingState.speakerTimeElapsed / 60);
-    const seconds = meetingState.speakerTimeElapsed % 60;
-    const timeString = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    
-    display.textContent = timeString;
+    display.textContent = formatTime(meetingState.speakerTimeElapsed);
+}
+
+// Utility Functions
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
 // Local Storage Functions
 function saveAgendaToStorage() {
     localStorage.setItem('greens-agenda', JSON.stringify(meetingState.agendaItems));
+    localStorage.setItem('greens-meeting-times', JSON.stringify({
+        startTime: meetingState.meetingStartTime,
+        endTime: meetingState.meetingEndTime
+    }));
 }
 
 function loadAgendaFromStorage() {
     const saved = localStorage.getItem('greens-agenda');
     if (saved) {
         meetingState.agendaItems = JSON.parse(saved);
+    }
+    
+    const times = localStorage.getItem('greens-meeting-times');
+    if (times) {
+        const parsed = JSON.parse(times);
+        meetingState.meetingStartTime = parsed.startTime;
+        meetingState.meetingEndTime = parsed.endTime;
+        
+        // Pre-populate time inputs if available
+        if (meetingState.meetingStartTime && meetingState.meetingEndTime) {
+            const startTime = new Date(meetingState.meetingStartTime);
+            const endTime = new Date(meetingState.meetingEndTime);
+            
+            document.getElementById('meeting-start-time').value = 
+                startTime.toTimeString().slice(0, 5);
+            document.getElementById('meeting-end-time').value = 
+                endTime.toTimeString().slice(0, 5);
+        }
     }
 }
 
@@ -285,5 +463,6 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(() => {
         updateAgendaTimerDisplay();
         updateSpeakerTimerDisplay();
+        updateMeetingTimeDisplay();
     }, 100);
 });

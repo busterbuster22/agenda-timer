@@ -1,55 +1,82 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Agenda Timer - Side Panel</title>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agenda Timer - Side Panel</title>
     <link rel="stylesheet" href="styles.css">
+    <script src="https://www.gstatic.com/meet/addons/1.1.0/meet.addons.js"></script>
 </head>
 <body>
-    <div class="side-panel">
+    <div class="side-panel-container">
         <h2>Agenda Timer Control Panel</h2>
         
-        <!-- Agenda Management -->
-        <div class="section">
-            <h3>Agenda Items</h3>
-            <div id="agenda-list"></div>
-            <div class="add-agenda">
-                <input type="text" id="new-agenda-item" placeholder="New agenda item">
-                <input type="number" id="agenda-duration" placeholder="Minutes" min="1" value="5">
-                <button onclick="addAgendaItem()">Add Item</button>
+        <button id="start-activity" class="primary">Show Timers to All Participants</button>
+        
+        <!-- Meeting Time Section -->
+        <div class="control-section">
+            <h3>Meeting Time</h3>
+            <div class="meeting-time-inputs">
+                <div>
+                    <label for="meeting-start-time">Start Time:</label>
+                    <input type="time" id="meeting-start-time">
+                </div>
+                <div>
+                    <label for="meeting-end-time">End Time:</label>
+                    <input type="time" id="meeting-end-time">
+                </div>
+                <button onclick="setMeetingTime()" class="secondary">Set Times</button>
+            </div>
+            <div id="meeting-time-display" class="meeting-time-display">
+                <span style="color: #5f6368;">Set meeting times above</span>
             </div>
         </div>
-
-        <!-- Agenda Timer Controls -->
-        <div class="section">
-            <h3>Current Agenda Timer</h3>
-            <div id="current-agenda-display">No item selected</div>
-            <div class="timer-controls">
+        
+        <!-- Current Agenda Item Timer -->
+        <div class="control-section">
+            <h3>Current Agenda Item</h3>
+            <div id="current-agenda-display" class="timer-display">No item selected</div>
+            <div class="button-group">
                 <button onclick="startAgendaTimer()">Start</button>
-                <button onclick="pauseAgendaTimer()">Pause</button>
-                <button onclick="stopAgendaTimer()">Stop</button>
-                <button onclick="nextAgendaItem()">Next Item</button>
+                <button onclick="pauseAgendaTimer()" class="secondary">Pause</button>
+                <button onclick="stopAgendaTimer()" class="secondary">Stop</button>
+                <button onclick="nextAgendaItem()" class="primary">Next Item</button>
             </div>
         </div>
-
-        <!-- Speaker Timer Controls -->
-        <div class="section">
+        
+        <!-- Speaker Timer -->
+        <div class="control-section">
             <h3>Speaker Timer</h3>
-            <div id="speaker-timer-display">00:00</div>
-            <div class="timer-controls">
+            <div id="speaker-timer-display" class="timer-display">00:00</div>
+            <div class="button-group">
                 <button onclick="startSpeakerTimer()">Start</button>
-                <button onclick="pauseSpeakerTimer()">Pause</button>
-                <button onclick="stopSpeakerTimer()">Stop/Reset</button>
+                <button onclick="pauseSpeakerTimer()" class="secondary">Pause</button>
+                <button onclick="stopSpeakerTimer()" class="secondary">Stop</button>
             </div>
         </div>
-
-        <!-- Launch Main Stage -->
-        <div class="section">
-            <button id="start-activity" class="primary-button">Show Timers to All Participants</button>
+        
+        <!-- Agenda Items List -->
+        <div class="control-section">
+            <h3>Agenda Items</h3>
+            <div id="agenda-list" class="agenda-list">
+                <!-- Agenda items will be rendered here -->
+            </div>
+        </div>
+        
+        <!-- Add New Agenda Item -->
+        <div class="control-section">
+            <h3>Add Agenda Item</h3>
+            <div class="add-agenda-form">
+                <input type="text" id="new-agenda-item" placeholder="Item name" class="full-width">
+                <div class="duration-input">
+                    <input type="number" id="agenda-duration" value="5" min="1" max="120">
+                    <span>minutes</span>
+                    <button onclick="addAgendaItem()" class="primary">Add</button>
+                </div>
+            </div>
         </div>
     </div>
-
-    <script src="https://www.gstatic.com/meetjs/addons/1.1.0/meet.addons.js"></script>
+    
     <script src="sidepanel.js"></script>
 </body>
 </html>

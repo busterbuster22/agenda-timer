@@ -1,61 +1,282 @@
 /* General Styles */
 * {
-    box-sizing: border-box;
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 body {
-    font-family: 'Google Sans', Roboto, Arial, sans-serif;
+    font-family: 'Google Sans', 'Roboto', Arial, sans-serif;
     background: #f8f9fa;
     color: #202124;
+    line-height: 1.5;
 }
 
-/* Side Panel Styles */
-.side-panel {
+/* Centered, narrower layout for screen sharing */
+body.screenshare-mode {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    background: #f0f0f0;
     padding: 20px;
-    max-width: 400px;
 }
 
-.side-panel h2 {
-    margin-bottom: 20px;
-    color: #1a73e8;
-    font-size: 24px;
+body.screenshare-mode .main-stage-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    background: #fff;
 }
 
-.section {
+/* Container Styles */
+.side-panel-container,
+.main-stage-container {
+    padding: 20px;
     background: white;
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 16px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
 }
 
-.section h3 {
-    margin-bottom: 12px;
-    font-size: 16px;
+.main-stage-container {
+    min-height: 100vh;
+}
+
+/* Typography */
+h1 {
+    font-size: 32px;
+    font-weight: 500;
+    margin-bottom: 24px;
+    color: #1a73e8;
+    text-align: center;
+}
+
+h2 {
+    font-size: 20px;
+    font-weight: 500;
+    margin-bottom: 16px;
     color: #5f6368;
 }
 
-/* Agenda List */
-#agenda-list {
+h3 {
+    font-size: 16px;
+    font-weight: 500;
     margin-bottom: 12px;
+    color: #5f6368;
+}
+
+/* Button Styles */
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+button.primary {
+    background: #1a73e8;
+    color: white;
+}
+
+button.primary:hover:not(:disabled) {
+    background: #1557b0;
+}
+
+button.secondary {
+    background: #f1f3f4;
+    color: #5f6368;
+}
+
+button.secondary:hover:not(:disabled) {
+    background: #e8eaed;
+}
+
+button.danger {
+    background: #ea4335;
+    color: white;
+}
+
+button.danger:hover:not(:disabled) {
+    background: #d33b2c;
+}
+
+button.small {
+    padding: 6px 12px;
+    font-size: 12px;
+}
+
+/* Control Sections */
+.control-section {
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid #e8eaed;
+}
+
+.control-section:last-child {
+    border-bottom: none;
+}
+
+/* Meeting Time Section */
+.meeting-time-inputs {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.meeting-time-inputs > div {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.meeting-time-inputs label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #5f6368;
+}
+
+.meeting-time-inputs input[type="time"] {
+    padding: 8px;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.meeting-time-display {
+    background: #f8f9fa;
+    padding: 12px;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.meeting-time-display div {
+    font-size: 14px;
+}
+
+.meeting-time-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 24px;
+}
+
+.meeting-time-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+}
+
+.time-item {
+    text-align: center;
+}
+
+.time-label {
+    font-size: 14px;
+    color: #5f6368;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.time-value {
+    font-size: 28px;
+    font-weight: 500;
+    color: #202124;
+}
+
+/* Timer Displays */
+.timer-display {
+    font-size: 36px;
+    font-weight: 500;
+    font-family: 'Roboto Mono', monospace;
+    color: #1a73e8;
+    text-align: center;
+    padding: 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+.large-timer {
+    font-size: 72px;
+    font-weight: 500;
+    font-family: 'Roboto Mono', monospace;
+    color: #1a73e8;
+    text-align: center;
+    padding: 20px;
+}
+
+.large-timer.warning {
+    color: #f9ab00;
+}
+
+.large-timer.danger {
+    color: #ea4335;
+}
+
+/* Status Indicators */
+.status {
+    text-align: center;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 500;
+    display: inline-block;
+}
+
+.status.running {
+    background: #e8f5e9;
+    color: #1e8e3e;
+}
+
+.status.paused {
+    background: #fff3e0;
+    color: #f9ab00;
+}
+
+.status.stopped {
+    background: #f1f3f4;
+    color: #5f6368;
+}
+
+/* Button Groups */
+.button-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* Agenda List */
+.agenda-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .agenda-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px;
-    margin-bottom: 8px;
+    padding: 16px;
     background: #f8f9fa;
-    border-radius: 4px;
+    border-radius: 8px;
     border-left: 4px solid #dadce0;
+    transition: all 0.2s;
 }
 
 .agenda-item.active {
-    border-left-color: #1a73e8;
     background: #e8f0fe;
+    border-left-color: #1a73e8;
 }
 
 .agenda-item.completed {
@@ -63,173 +284,106 @@ body {
     text-decoration: line-through;
 }
 
-.agenda-item-content {
-    flex: 1;
+.agenda-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
 }
 
 .agenda-item-name {
     font-weight: 500;
-    margin-bottom: 4px;
-}
-
-.agenda-item-duration {
-    font-size: 12px;
-    color: #5f6368;
+    font-size: 14px;
+    flex: 1;
 }
 
 .agenda-item-controls {
     display: flex;
-    gap: 4px;
+    gap: 6px;
 }
 
-/* Add Agenda Input */
-.add-agenda {
+.agenda-item-times {
     display: flex;
-    gap: 8px;
-    margin-top: 12px;
-}
-
-.add-agenda input[type="text"] {
-    flex: 1;
-    padding: 8px;
-    border: 1px solid #dadce0;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-.add-agenda input[type="number"] {
-    width: 70px;
-    padding: 8px;
-    border: 1px solid #dadce0;
-    border-radius: 4px;
-    font-size: 14px;
-}
-
-/* Buttons */
-button {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    background: #1a73e8;
-    color: white;
-    transition: background 0.2s;
-}
-
-button:hover {
-    background: #1557b0;
-}
-
-button:active {
-    background: #0d47a1;
-}
-
-button.secondary {
-    background: #dadce0;
-    color: #202124;
-}
-
-button.secondary:hover {
-    background: #bdc1c6;
-}
-
-button.danger {
-    background: #d93025;
-}
-
-button.danger:hover {
-    background: #b31412;
-}
-
-button.small {
-    padding: 4px 8px;
+    gap: 16px;
     font-size: 12px;
+    color: #5f6368;
+    margin-top: 8px;
 }
 
-.primary-button {
-    width: 100%;
-    padding: 12px;
-    font-size: 16px;
-    background: #1a73e8;
-}
-
-/* Timer Controls */
-.timer-controls {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-    margin-top: 12px;
-}
-
-.timer-controls button {
-    flex: 1;
-    min-width: 70px;
-}
-
-/* Timer Display */
-#current-agenda-display,
-#speaker-timer-display {
-    font-size: 32px;
-    font-weight: 700;
-    text-align: center;
-    padding: 20px;
-    background: #f8f9fa;
-    border-radius: 8px;
-    margin-bottom: 12px;
-    font-family: 'Roboto Mono', monospace;
-}
-
-/* Main Stage Styles */
-.main-stage {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    min-height: 100vh;
-    padding: 40px;
-}
-
-.display-container {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-}
-
-.agenda-display {
-    grid-column: 1 / -1;
-    background: white;
-    border-radius: 12px;
-    padding: 24px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-}
-
-.agenda-display h2 {
-    color: #667eea;
-    margin-bottom: 16px;
-    font-size: 28px;
-}
-
-#agenda-items-display {
+/* Add Agenda Form */
+.add-agenda-form {
     display: flex;
     flex-direction: column;
+    gap: 12px;
+}
+
+.add-agenda-form input[type="text"],
+.add-agenda-form input[type="number"] {
+    padding: 10px;
+    border: 1px solid #dadce0;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.duration-input {
+    display: flex;
     gap: 8px;
+    align-items: center;
+}
+
+.duration-input input[type="number"] {
+    width: 80px;
+}
+
+/* Main Stage Specific Styles */
+.timers-section {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.timer-card {
+    background: #f8f9fa;
+    padding: 24px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.current-item-name {
+    font-size: 18px;
+    font-weight: 500;
+    color: #202124;
+    margin-bottom: 16px;
+    min-height: 24px;
+}
+
+.agenda-section {
+    margin-top: 32px;
+}
+
+.agenda-items-display {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .display-agenda-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 12px 16px;
+    padding: 16px;
     background: #f8f9fa;
     border-radius: 8px;
     border-left: 4px solid #dadce0;
-    font-size: 16px;
+    transition: all 0.3s;
 }
 
 .display-agenda-item.active {
     background: #e8f0fe;
     border-left-color: #1a73e8;
-    font-weight: 600;
+    transform: scale(1.02);
 }
 
 .display-agenda-item.completed {
@@ -241,98 +395,98 @@ button.small {
     opacity: 0.8;
 }
 
-/* Timer Display Boxes */
-.timer-display {
-    background: white;
-    border-radius: 12px;
-    padding: 32px;
-    text-align: center;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+.display-agenda-item .agenda-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
 }
 
-.timer-display h3 {
-    color: #5f6368;
-    margin-bottom: 16px;
-    font-size: 20px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-}
-
-#current-item-name {
-    font-size: 24px;
-    font-weight: 600;
-    color: #202124;
-    margin-bottom: 20px;
-    min-height: 30px;
-}
-
-.big-timer {
-    font-size: 72px;
-    font-weight: 700;
-    font-family: 'Roboto Mono', monospace;
-    color: #202124;
-    margin: 20px 0;
-}
-
-.agenda-timer .big-timer {
-    color: #1a73e8;
-}
-
-.speaker-timer .big-timer {
-    color: #34a853;
-}
-
-.big-timer.warning {
-    color: #f9ab00;
-}
-
-.big-timer.danger {
-    color: #d93025;
-    animation: pulse 1s infinite;
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.7; }
-}
-
-.status {
+.agenda-item-allocated {
     font-size: 14px;
+    color: #5f6368;
     font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    padding: 6px 12px;
-    border-radius: 4px;
-    display: inline-block;
+}
+
+/* Progress Bar */
+.agenda-item-progress {
     margin-top: 8px;
 }
 
-.status.running {
-    background: #e8f5e9;
-    color: #1e8e3e;
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: #e8eaed;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 8px;
 }
 
-.status.paused {
-    background: #fff3e0;
-    color: #e37400;
+.progress-fill {
+    height: 100%;
+    background: #1a73e8;
+    transition: width 0.3s ease;
+    border-radius: 4px;
 }
 
-.status.stopped {
-    background: #f1f3f4;
+.progress-fill.warning {
+    background: #f9ab00;
+}
+
+.progress-fill.overtime {
+    background: #ea4335;
+}
+
+.agenda-item-times {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
     color: #5f6368;
+}
+
+.agenda-item-times strong {
+    color: #202124;
+}
+
+/* Color Classes */
+.warning {
+    color: #f9ab00 !important;
+}
+
+.danger {
+    color: #ea4335 !important;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
-    .display-container {
+    .timers-section {
         grid-template-columns: 1fr;
     }
     
-    .big-timer {
+    .meeting-time-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .large-timer {
         font-size: 48px;
     }
     
-    .main-stage {
-        padding: 20px;
+    .meeting-time-inputs {
+        flex-direction: column;
+        align-items: stretch;
     }
+}
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+.status.running {
+    animation: pulse 2s infinite;
 }
