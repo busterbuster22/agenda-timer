@@ -31,10 +31,8 @@ async function initializeSidePanel() {
         // Start broadcasting state updates
         startStateBroadcast();
         
-        // Set up the button to launch the main stage
-        document.getElementById('start-activity').addEventListener('click', async () => {
-            await startMainStage();
-        });
+        // Set up event listeners
+        setupEventListeners();
         
         // Load saved agenda items from localStorage
         loadAgendaFromStorage();
@@ -48,6 +46,20 @@ async function initializeSidePanel() {
     } catch (error) {
         console.error('Failed to initialize side panel:', error);
     }
+}
+
+// Set up all event listeners
+function setupEventListeners() {
+    document.getElementById('start-activity').addEventListener('click', startMainStage);
+    document.getElementById('set-meeting-time-btn').addEventListener('click', setMeetingTime);
+    document.getElementById('start-agenda-timer-btn').addEventListener('click', startAgendaTimer);
+    document.getElementById('pause-agenda-timer-btn').addEventListener('click', pauseAgendaTimer);
+    document.getElementById('stop-agenda-timer-btn').addEventListener('click', stopAgendaTimer);
+    document.getElementById('next-agenda-item-btn').addEventListener('click', nextAgendaItem);
+    document.getElementById('start-speaker-timer-btn').addEventListener('click', startSpeakerTimer);
+    document.getElementById('pause-speaker-timer-btn').addEventListener('click', pauseSpeakerTimer);
+    document.getElementById('stop-speaker-timer-btn').addEventListener('click', stopSpeakerTimer);
+    document.getElementById('add-agenda-item-btn').addEventListener('click', addAgendaItem);
 }
 
 // Start the main stage activity (visible to all participants)
@@ -277,7 +289,9 @@ function renderAgendaList() {
         return;
     }
     
-    container.innerHTML = meetingState.agendaItems.map((item, index) => {
+    container.innerHTML = '';
+    
+    meetingState.agendaItems.forEach((item, index) => {
         const isActive = index === meetingState.currentAgendaIndex;
         const statusClass = item.completed ? 'completed' : (isActive ? 'active' : '');
         
@@ -290,25 +304,56 @@ function renderAgendaList() {
         const remainingStr = formatTime(remainingSeconds);
         const overtimeStr = isOvertime ? formatTime(usedSeconds - allocatedSeconds) : '';
         
-        return `
-            <div class="agenda-item ${statusClass}">
-                <div class="agenda-item-header">
-                    <div class="agenda-item-name">${item.name}</div>
-                    <div class="agenda-item-controls">
-                        <button class="small secondary" onclick="moveAgendaItemUp(${index})" ${index === 0 ? 'disabled' : ''}>↑</button>
-                        <button class="small secondary" onclick="moveAgendaItemDown(${index})" ${index === meetingState.agendaItems.length - 1 ? 'disabled' : ''}>↓</button>
-                        <button class="small secondary" onclick="selectAgendaItem(${index})">Select</button>
-                        <button class="small danger" onclick="removeAgendaItem(${item.id})">✕</button>
-                    </div>
-                </div>
-                <div class="agenda-item-times">
-                    <span>Allocated: ${item.durationMinutes} min</span>
-                    <span>Used: <strong class="${isOvertime ? 'danger' : ''}">${usedStr}</strong></span>
-                    <span>Remaining: <strong class="${isOvertime ? 'danger' : (remainingSeconds < 60 ? 'warning' : '')}">${isOvertime ? '-' + overtimeStr : remainingStr}</strong></span>
+        const itemDiv = document.createElement('div');
+        itemDiv.className = `agenda-item ${statusClass}`;
+        itemDiv.innerHTML = `
+            <div class="agenda-item-header">
+                <div class="agenda-item-name">${item.name}</div>
+                <div class="agenda-item-controls">
+                    <button class="small secondary btn-move-up" data-index="${index}" ${index === 0 ? 'disabled' : ''}>↑</button>
+                    <button class="small secondary btn-move-down" data-index="${index}" ${index === meetingState.agendaItems.length - 1 ? 'disabled' : ''}>↓</button>
+                    <button class="small secondary btn-select" data-index="${index}">Select</button>
+                    <button class="small danger btn-remove" data-id="${item.id}">✕</button>
                 </div>
             </div>
+            <div class="agenda-item-times">
+                <span>Allocated: ${item.durationMinutes} min</span>
+                <span>Used: <strong class="${isOvertime ? 'danger' : ''}">${usedStr}</strong></span>
+                <span>Remaining: <strong class="${isOvertime ? 'danger' : (remainingSeconds < 60 ? 'warning' : '')}">${isOvertime ? '-' + overtimeStr : remainingStr}</strong></span>
+            </div>
         `;
-    }).join('');
+        
+        container.appendChild(itemDiv);
+    });
+    
+    // Add event listeners to the dynamically created buttons
+    container.querySelectorAll('.btn-move-up').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const index = parseInt(e.target.dataset.index);
+            moveAgendaItemUp(index);
+        });
+    });
+    
+    container.querySelectorAll('.btn-move-down').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const index = parseInt(e.target.dataset.index);
+            moveAgendaItemDown(index);
+        });
+    });
+    
+    container.querySelectorAll('.btn-select').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const index = parseInt(e.target.dataset.index);
+            selectAgendaItem(index);
+        });
+    });
+    
+    container.querySelectorAll('.btn-remove').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const id = parseInt(e.target.dataset.id);
+            removeAgendaItem(id);
+        });
+    });
 }
 
 // Agenda Timer Functions

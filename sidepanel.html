@@ -24,7 +24,7 @@
                     <label for="meeting-end-time">End Time:</label>
                     <input type="time" id="meeting-end-time">
                 </div>
-                <button onclick="setMeetingTime()" class="secondary">Set Times</button>
+                <button id="set-meeting-time-btn" class="secondary">Set Times</button>
             </div>
             <div id="meeting-time-display" class="meeting-time-display">
                 <span style="color: #5f6368;">Set meeting times above</span>
@@ -36,10 +36,10 @@
             <h3>Current Agenda Item</h3>
             <div id="current-agenda-display" class="timer-display">No item selected</div>
             <div class="button-group">
-                <button onclick="startAgendaTimer()">Start</button>
-                <button onclick="pauseAgendaTimer()" class="secondary">Pause</button>
-                <button onclick="stopAgendaTimer()" class="secondary">Stop</button>
-                <button onclick="nextAgendaItem()" class="primary">Next Item</button>
+                <button id="start-agenda-timer-btn">Start</button>
+                <button id="pause-agenda-timer-btn" class="secondary">Pause</button>
+                <button id="stop-agenda-timer-btn" class="secondary">Stop</button>
+                <button id="next-agenda-item-btn" class="primary">Next Item</button>
             </div>
         </div>
         
@@ -48,9 +48,9 @@
             <h3>Speaker Timer</h3>
             <div id="speaker-timer-display" class="timer-display">00:00</div>
             <div class="button-group">
-                <button onclick="startSpeakerTimer()">Start</button>
-                <button onclick="pauseSpeakerTimer()" class="secondary">Pause</button>
-                <button onclick="stopSpeakerTimer()" class="secondary">Stop</button>
+                <button id="start-speaker-timer-btn">Start</button>
+                <button id="pause-speaker-timer-btn" class="secondary">Pause</button>
+                <button id="stop-speaker-timer-btn" class="secondary">Stop</button>
             </div>
         </div>
         
@@ -70,7 +70,7 @@
                 <div class="duration-input">
                     <input type="number" id="agenda-duration" value="5" min="1" max="120">
                     <span>minutes</span>
-                    <button onclick="addAgendaItem()" class="primary">Add</button>
+                    <button id="add-agenda-item-btn" class="primary">Add</button>
                 </div>
             </div>
         </div>
