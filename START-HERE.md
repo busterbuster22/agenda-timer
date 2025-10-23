@@ -39,7 +39,7 @@ You MUST update these 2 files with your Google Cloud Project Number:
 - `sidepanel.js` (line 18)
 - `mainstage.js` (line 17)
 
-Look for: `cloudProjectNumber: 'YOUR_CLOUD_PROJECT_NUMBER'`
+Look for: `cloudProjectNumber: '879397453091'`
 
 ## 🆘 Need Help?
 

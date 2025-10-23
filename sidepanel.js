@@ -24,6 +24,9 @@ async function initializeSidePanel() {
         sidePanelClient = await session.createSidePanelClient();
         
         console.log('Side panel initialized');
+
+        // Start broadcasting state updates
+        startStateBroadcast();  
         
         // Set up the button to launch the main stage
         document.getElementById('start-activity').addEventListener('click', async () => {
