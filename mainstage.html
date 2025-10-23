@@ -19,44 +19,23 @@
             margin: 0 auto;
         }
 
-        /* Meeting Time Display */
-        .meeting-time-display {
-            text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-        }
-
-        .meeting-time-display h2 {
-            margin: 0 0 10px 0;
-            font-size: 18px;
-            color: #aaa;
-            font-weight: normal;
-        }
-
-        .meeting-time-display .time {
-            font-size: 48px;
-            font-weight: bold;
-            color: #4CAF50;
-            font-variant-numeric: tabular-nums;
-        }
-
         /* Circular Timer Section */
         .circular-timer-section {
             display: flex;
             justify-content: center;
             align-items: center;
+            gap: 60px;
             margin-bottom: 40px;
             padding: 30px;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 10px;
+            flex-wrap: wrap;
         }
 
         .circular-timer-container {
             position: relative;
-            width: 300px;
-            height: 300px;
+            width: 250px;
+            height: 250px;
         }
 
         .circular-timer-svg {
@@ -73,18 +52,9 @@
 
         .circular-timer-circle-progress {
             fill: none;
-            stroke: #4CAF50;
             stroke-width: 12;
             stroke-linecap: round;
-            transition: stroke-dashoffset 1s linear, stroke 0.3s ease;
-        }
-
-        .circular-timer-circle-progress.warning {
-            stroke: #FFA726;
-        }
-
-        .circular-timer-circle-progress.overtime {
-            stroke: #EF5350;
+            transition: stroke-dashoffset 1s linear;
         }
 
         .circular-timer-text {
@@ -96,22 +66,16 @@
         }
 
         .circular-timer-time {
-            font-size: 56px;
+            font-size: 48px;
             font-weight: bold;
             color: #ffffff;
             font-variant-numeric: tabular-nums;
         }
 
         .circular-timer-label {
-            font-size: 16px;
+            font-size: 18px;
             color: #aaa;
-            margin-top: 5px;
-        }
-
-        .circular-timer-item-name {
-            font-size: 20px;
-            color: #fff;
-            margin-bottom: 15px;
+            margin-top: 8px;
             font-weight: 500;
         }
 
@@ -207,66 +171,57 @@
 </head>
 <body>
     <div id="mainStage">
-        <!-- Meeting Time Display -->
-        <div class="meeting-time-display">
-            <h2>Total Meeting Time</h2>
-            <div class="time" id="totalMeetingTime">0:00:00</div>
-        </div>
-
-        <!-- Circular Timer for Current Item -->
-        <div class="circular-timer-section" id="circularTimerSection" style="display: none;">
-            <div style="display: flex; gap: 60px; align-items: center; justify-content: center; flex-wrap: wrap;">
-                <!-- Agenda Item Timer Circle -->
-                <div class="circular-timer-container">
-                    <svg class="circular-timer-svg" viewBox="0 0 200 200">
-                        <circle 
-                            class="circular-timer-circle-bg"
-                            cx="100" 
-                            cy="100" 
-                            r="90">
-                        </circle>
-                        <circle 
-                            class="circular-timer-circle-progress"
-                            id="circularProgressCircle"
-                            cx="100" 
-                            cy="100" 
-                            r="90"
-                            stroke-dasharray="565.48"
-                            stroke-dashoffset="0">
-                        </circle>
-                    </svg>
-                    <div class="circular-timer-text">
-                        <div class="circular-timer-item-name" id="circularItemName"></div>
-                        <div class="circular-timer-time" id="circularTimerDisplay">0:00</div>
-                        <div class="circular-timer-label" id="circularTimerLabel">Remaining</div>
-                    </div>
+        <!-- Circular Timers (Always Visible) -->
+        <div class="circular-timer-section">
+            <!-- Total Meeting Time Circle -->
+            <div class="circular-timer-container">
+                <svg class="circular-timer-svg" viewBox="0 0 200 200">
+                    <circle 
+                        class="circular-timer-circle-bg"
+                        cx="100" 
+                        cy="100" 
+                        r="90">
+                    </circle>
+                    <circle 
+                        class="circular-timer-circle-progress"
+                        id="meetingProgressCircle"
+                        cx="100" 
+                        cy="100" 
+                        r="90"
+                        stroke="#4CAF50"
+                        stroke-dasharray="565.48"
+                        stroke-dashoffset="565.48">
+                    </circle>
+                </svg>
+                <div class="circular-timer-text">
+                    <div class="circular-timer-time" id="meetingTimerDisplay">0:00:00</div>
+                    <div class="circular-timer-label">Meeting Time</div>
                 </div>
+            </div>
 
-                <!-- Speaker Timer Circle -->
-                <div class="circular-timer-container">
-                    <svg class="circular-timer-svg" viewBox="0 0 200 200">
-                        <circle 
-                            class="circular-timer-circle-bg"
-                            cx="100" 
-                            cy="100" 
-                            r="90">
-                        </circle>
-                        <circle 
-                            class="circular-timer-circle-progress"
-                            id="speakerProgressCircle"
-                            cx="100" 
-                            cy="100" 
-                            r="90"
-                            stroke-dasharray="565.48"
-                            stroke-dashoffset="565.48"
-                            style="stroke: #9C27B0;">
-                        </circle>
-                    </svg>
-                    <div class="circular-timer-text">
-                        <div class="circular-timer-item-name">Speaker Time</div>
-                        <div class="circular-timer-time" id="speakerTimerDisplay">0:00</div>
-                        <div class="circular-timer-label">Elapsed</div>
-                    </div>
+            <!-- Speaker Timer Circle -->
+            <div class="circular-timer-container">
+                <svg class="circular-timer-svg" viewBox="0 0 200 200">
+                    <circle 
+                        class="circular-timer-circle-bg"
+                        cx="100" 
+                        cy="100" 
+                        r="90">
+                    </circle>
+                    <circle 
+                        class="circular-timer-circle-progress"
+                        id="speakerProgressCircle"
+                        cx="100" 
+                        cy="100" 
+                        r="90"
+                        stroke="#9C27B0"
+                        stroke-dasharray="565.48"
+                        stroke-dashoffset="565.48">
+                    </circle>
+                </svg>
+                <div class="circular-timer-text">
+                    <div class="circular-timer-time" id="speakerTimerDisplay">0:00</div>
+                    <div class="circular-timer-label">Speaker Time</div>
                 </div>
             </div>
         </div>

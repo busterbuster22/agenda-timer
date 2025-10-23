@@ -47,6 +47,7 @@ function updateState(newState) {
     console.log('Updating state with:', newState);
     currentState = { ...currentState, ...newState };
     renderAgenda();
+    updateCircularTimers();
 }
 
 function renderAgenda() {
@@ -54,7 +55,6 @@ function renderAgenda() {
     
     if (!currentState.agendaItems || currentState.agendaItems.length === 0) {
         agendaList.innerHTML = '<li class="no-items-message">No agenda items yet</li>';
-        document.getElementById('circularTimerSection').style.display = 'none';
         return;
     }
     
@@ -112,91 +112,39 @@ function renderAgenda() {
         
         agendaList.appendChild(li);
     });
-    
-    // Also update the circular timer when agenda changes
-    updateCircularTimer();
 }
 
-function updateCircularTimer() {
-    const circularSection = document.getElementById('circularTimerSection');
-    const circularItemName = document.getElementById('circularItemName');
-    const circularTimerDisplay = document.getElementById('circularTimerDisplay');
-    const circularTimerLabel = document.getElementById('circularTimerLabel');
-    const progressCircle = document.getElementById('circularProgressCircle');
+function updateCircularTimers() {
+    const meetingTimerDisplay = document.getElementById('meetingTimerDisplay');
+    const meetingProgressCircle = document.getElementById('meetingProgressCircle');
     const speakerTimerDisplay = document.getElementById('speakerTimerDisplay');
     const speakerProgressCircle = document.getElementById('speakerProgressCircle');
     
-    // Only show circular timer if there's an active item
-    if (currentState.currentItemIndex >= 0 && currentState.currentItemIndex < currentState.agendaItems.length) {
-        const currentItem = currentState.agendaItems[currentState.currentItemIndex];
-        const timeUsed = currentItem.timeUsedSeconds || 0;
-        const timeRemaining = currentItem.duration - timeUsed;
-        
-        circularSection.style.display = 'flex';
-        circularItemName.textContent = currentItem.name;
-        
-        // Calculate progress for the agenda item circular display
-        let progress;
-        if (timeRemaining >= 0) {
-            // Normal countdown - circle depletes as time is used
-            progress = timeRemaining / currentItem.duration;
-        } else {
-            // Overtime - circle is empty but we still show the negative time
-            progress = 0;
-        }
-        
-        // Update the agenda item circle
-        const offset = CIRCLE_CIRCUMFERENCE * (1 - progress);
-        progressCircle.style.strokeDashoffset = offset;
-        
-        // Update colour based on remaining time
-        progressCircle.classList.remove('warning', 'overtime');
-        if (timeRemaining < 0) {
-            progressCircle.classList.add('overtime');
-        } else if (timeRemaining <= currentItem.duration * 0.2) {
-            progressCircle.classList.add('warning');
-        }
-        
-        // Format and display agenda item time
-        const displayMinutes = Math.floor(Math.abs(timeRemaining) / 60);
-        const displaySeconds = Math.abs(timeRemaining) % 60;
-        const timeText = timeRemaining < 0 
-            ? `-${displayMinutes}:${displaySeconds.toString().padStart(2, '0')}`
-            : `${displayMinutes}:${displaySeconds.toString().padStart(2, '0')}`;
-        
-        circularTimerDisplay.textContent = timeText;
-        circularTimerLabel.textContent = timeRemaining >= 0 ? 'Remaining' : 'Overtime';
-        
-        // Update speaker timer display
-        const speakerMinutes = Math.floor(currentState.speakerTimeElapsed / 60);
-        const speakerSeconds = currentState.speakerTimeElapsed % 60;
-        speakerTimerDisplay.textContent = `${speakerMinutes}:${speakerSeconds.toString().padStart(2, '0')}`;
-        
-        // Speaker timer circle fills up (counts up)
-        // Cap at full circle after 10 minutes (600 seconds)
-        const speakerProgress = Math.min(currentState.speakerTimeElapsed / 600, 1);
-        const speakerOffset = CIRCLE_CIRCUMFERENCE * (1 - speakerProgress);
-        speakerProgressCircle.style.strokeDashoffset = speakerOffset;
-        
-    } else {
-        circularSection.style.display = 'none';
-    }
-}
-
-function updateDisplay() {
-    // Update total meeting time
-    const totalMeetingTimeEl = document.getElementById('totalMeetingTime');
+    // Update meeting time display
     const hours = Math.floor(currentState.totalMeetingTime / 3600);
     const minutes = Math.floor((currentState.totalMeetingTime % 3600) / 60);
     const seconds = currentState.totalMeetingTime % 60;
-    totalMeetingTimeEl.textContent = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+    meetingTimerDisplay.textContent = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     
-    // Update circular timer if timer is running
-    if (currentState.agendaTimerRunning && 
-        currentState.currentItemIndex >= 0 && 
-        currentState.currentItemIndex < currentState.agendaItems.length) {
-        updateCircularTimer();
-    }
+    // Update meeting time circle (fills up over 60 minutes)
+    const meetingProgress = Math.min(currentState.totalMeetingTime / 3600, 1); // 60 minutes = 3600 seconds
+    const meetingOffset = CIRCLE_CIRCUMFERENCE * (1 - meetingProgress);
+    meetingProgressCircle.style.strokeDashoffset = meetingOffset;
+    
+    // Update speaker time display
+    const speakerMinutes = Math.floor(currentState.speakerTimeElapsed / 60);
+    const speakerSeconds = currentState.speakerTimeElapsed % 60;
+    speakerTimerDisplay.textContent = `${speakerMinutes}:${speakerSeconds.toString().padStart(2, '0')}`;
+    
+    // Update speaker time circle (fills up over 10 minutes)
+    const speakerProgress = Math.min(currentState.speakerTimeElapsed / 600, 1); // 10 minutes = 600 seconds
+    const speakerOffset = CIRCLE_CIRCUMFERENCE * (1 - speakerProgress);
+    speakerProgressCircle.style.strokeDashoffset = speakerOffset;
+}
+
+function updateDisplay() {
+    // Update circular timers every second
+    updateCircularTimers();
 }
 
 function escapeHtml(text) {
