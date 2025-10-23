@@ -13,35 +13,45 @@ let meetingState = {
 // Initialize the main stage
 async function initializeMainStage() {
     try {
-        // Replace 'YOUR_CLOUD_PROJECT_NUMBER' with your actual Google Cloud project number
         const session = await meet.addon.createAddonSession({
             cloudProjectNumber: '879397453091'
         });
         
         mainStageClient = await session.createMainStageClient();
-        
         console.log('Main stage initialized');
         
-        // Get initial state
-        const activityState = await mainStageClient.getActivityState();
-        if (activityState && activityState.additionalData) {
-            meetingState = JSON.parse(activityState.additionalData);
-            updateDisplay();
-        }
+        // Load initial state from localStorage
+        loadStateFromStorage();
         
-        // Listen for state changes
-        mainStageClient.addStateChangedListener((state) => {
-            if (state && state.additionalData) {
-                meetingState = JSON.parse(state.additionalData);
+        // Listen for localStorage changes from side panel
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'meeting-state' && e.newValue) {
+                meetingState = JSON.parse(e.newValue);
                 updateDisplay();
             }
         });
+        
+        // Also poll localStorage regularly as backup
+        setInterval(() => {
+            loadStateFromStorage();
+        }, 500);
         
     } catch (error) {
         console.error('Failed to initialize main stage:', error);
     }
 }
 
+function loadStateFromStorage() {
+    const saved = localStorage.getItem('meeting-state');
+    if (saved) {
+        const newState = JSON.parse(saved);
+        // Only update if state actually changed
+        if (JSON.stringify(newState) !== JSON.stringify(meetingState)) {
+            meetingState = newState;
+            updateDisplay();
+        }
+    }
+}
 // Update all displays
 function updateDisplay() {
     renderAgendaDisplay();
