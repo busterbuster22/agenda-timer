@@ -42,20 +42,16 @@ async function initializeSidePanel() {
 // Start the main stage activity (visible to all participants)
 async function startMainStage() {
     try {
-        const mainStageUrl = window.location.origin + '/mainstage.html';
-        
         await sidePanelClient.startActivity({
-            mainStageUrl: mainStageUrl,
-            additionalData: JSON.stringify(meetingState)
+            mainStageUrl: 'https://agenda-timer.netlify.app/mainstage.html'
         });
-        
         console.log('Main stage started');
-        
-        // Start broadcasting state updates
-        startStateBroadcast();
-        
     } catch (error) {
         console.error('Failed to start main stage:', error);
+        // If it's already running, that's okay
+        if (error.message && error.message.includes('activity is ongoing')) {
+            console.log('Main stage is already active');
+        }
     }
 }
 

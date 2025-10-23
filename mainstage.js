@@ -15,7 +15,7 @@ async function initializeMainStage() {
     try {
         // Replace 'YOUR_CLOUD_PROJECT_NUMBER' with your actual Google Cloud project number
         const session = await meet.addon.createAddonSession({
-            cloudProjectNumber: 'YOUR_CLOUD_PROJECT_NUMBER'
+            cloudProjectNumber: '879397453091'
         });
         
         mainStageClient = await session.createMainStageClient();
