@@ -1,12 +1,14 @@
 let mainStageClient;
 let currentState = {
     agendaItems: [],
-    currentItemIndex: -1,
-    agendaTimerRunning: false,
-    speakerTimerRunning: false,
+    currentAgendaIndex: -1,
+    agendaTimerState: 'stopped',
     agendaTimeRemaining: 0,
+    speakerTimerState: 'stopped',
     speakerTimeElapsed: 0,
-    totalMeetingTime: 0
+    meetingStartTime: null,
+    meetingEndTime: null,
+    meetingElapsedSeconds: 0
 };
 
 // Circular timer properties
@@ -64,20 +66,20 @@ function renderAgenda() {
         const li = document.createElement('li');
         li.className = 'agenda-item';
         
-        if (index === currentState.currentItemIndex) {
+        if (index === currentState.currentAgendaIndex) {
             li.classList.add('active');
         }
         if (item.completed) {
             li.classList.add('completed');
         }
         
-        const durationMinutes = Math.floor(item.duration / 60);
-        const durationSeconds = item.duration % 60;
-        const durationText = `${durationMinutes}:${durationSeconds.toString().padStart(2, '0')}`;
+        const durationMinutes = item.durationMinutes;
+        const durationText = `${durationMinutes} min`;
         
         // Calculate time used and remaining for this item
         const timeUsed = item.timeUsedSeconds || 0;
-        const timeRemaining = item.duration - timeUsed;
+        const totalDuration = item.durationMinutes * 60; // Convert to seconds
+        const timeRemaining = totalDuration - timeUsed;
         
         const usedMinutes = Math.floor(Math.abs(timeUsed) / 60);
         const usedSeconds = Math.abs(timeUsed) % 60;
@@ -91,10 +93,10 @@ function renderAgenda() {
         
         // Determine timer colour based on remaining time
         let timerClass = '';
-        if (index === currentState.currentItemIndex && currentState.agendaTimerRunning) {
+        if (index === currentState.currentAgendaIndex && currentState.agendaTimerState === 'running') {
             if (timeRemaining < 0) {
                 timerClass = 'overtime';
-            } else if (timeRemaining <= item.duration * 0.2) {
+            } else if (timeRemaining <= totalDuration * 0.2) {
                 timerClass = 'warning';
             }
         }
@@ -121,23 +123,25 @@ function updateCircularTimers() {
     const speakerProgressCircle = document.getElementById('speakerProgressCircle');
     
     // Update meeting time display
-    const hours = Math.floor(currentState.totalMeetingTime / 3600);
-    const minutes = Math.floor((currentState.totalMeetingTime % 3600) / 60);
-    const seconds = currentState.totalMeetingTime % 60;
+    const totalSeconds = currentState.meetingElapsedSeconds || 0;
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
     meetingTimerDisplay.textContent = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     
     // Update meeting time circle (fills up over 60 minutes)
-    const meetingProgress = Math.min(currentState.totalMeetingTime / 3600, 1); // 60 minutes = 3600 seconds
+    const meetingProgress = Math.min(totalSeconds / 3600, 1); // 60 minutes = 3600 seconds
     const meetingOffset = CIRCLE_CIRCUMFERENCE * (1 - meetingProgress);
     meetingProgressCircle.style.strokeDashoffset = meetingOffset;
     
     // Update speaker time display
-    const speakerMinutes = Math.floor(currentState.speakerTimeElapsed / 60);
-    const speakerSeconds = currentState.speakerTimeElapsed % 60;
-    speakerTimerDisplay.textContent = `${speakerMinutes}:${speakerSeconds.toString().padStart(2, '0')}`;
+    const speakerSeconds = currentState.speakerTimeElapsed || 0;
+    const speakerMinutes = Math.floor(speakerSeconds / 60);
+    const speakerSecs = speakerSeconds % 60;
+    speakerTimerDisplay.textContent = `${speakerMinutes}:${speakerSecs.toString().padStart(2, '0')}`;
     
     // Update speaker time circle (fills up over 10 minutes)
-    const speakerProgress = Math.min(currentState.speakerTimeElapsed / 600, 1); // 10 minutes = 600 seconds
+    const speakerProgress = Math.min(speakerSeconds / 600, 1); // 10 minutes = 600 seconds
     const speakerOffset = CIRCLE_CIRCUMFERENCE * (1 - speakerProgress);
     speakerProgressCircle.style.strokeDashoffset = speakerOffset;
 }

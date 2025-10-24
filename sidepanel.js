@@ -80,14 +80,11 @@ async function startMainStage() {
 
 // Broadcast state updates to main stage via localStorage
 function broadcastState() {
-    // Save to localStorage so mainstage can read it
-    localStorage.setItem('meeting-state', JSON.stringify(meetingState));
-    
-    // Also try the SDK method (in case it works)
+    // Broadcast state to main stage using the SDK
     if (sidePanelClient) {
-        sidePanelClient.setActivityStartingState({
+        sidePanelClient.setActivityState({
             additionalData: JSON.stringify(meetingState)
-        }).catch(err => console.error('Failed to set activity state:', err));
+        }).catch(err => console.error('Failed to broadcast state:', err));
     }
 }
 
