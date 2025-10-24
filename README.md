@@ -51,7 +51,7 @@ Replace `'YOUR_CLOUD_PROJECT_NUMBER'` in both files:
 
 With your actual project number (numbers only, no quotes if it's purely numeric).
 
-### 4. Test Locally
+### 4. Test Locallyasdasdasd
 
 Run the local server:
 ```bash
