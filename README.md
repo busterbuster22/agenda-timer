@@ -57,7 +57,7 @@ Run the local server:
 ```bash
 npm start
 ```
-
+###cinnebt 
 Your app will be available at:
 - Side Panel: http://localhost:8080/sidepanel.html
 - Main Stage: http://localhost:8080/mainstage.html
