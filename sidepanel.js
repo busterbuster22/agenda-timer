@@ -82,7 +82,7 @@ async function startMainStage() {
 function broadcastState() {
     // Broadcast state to main stage using the SDK
     if (sidePanelClient) {
-        sidePanelClient.setActivityState({
+        sidePanelClient.setActivityStartingState({
             additionalData: JSON.stringify(meetingState)
         }).catch(err => console.error('Failed to broadcast state:', err));
     }
