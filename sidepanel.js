@@ -66,7 +66,7 @@ function setupEventListeners() {
 async function startMainStage() {
     try {
         await sidePanelClient.startActivity({
-            mainStageUrl: 'https://agenda-timer.netlify.app/mainstage.html'
+            mainStageUrl: 'https://agenda-timer.politiapps.org/mainstage.html'
         });
         console.log('Main stage started');
     } catch (error) {
