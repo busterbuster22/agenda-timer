@@ -226,6 +226,28 @@ function removeAgendaItem(id) {
     broadcastState();
 }
 
+function adjustAgendaItemTime(index, minutesToAdd) {
+    if (index >= 0 && index < meetingState.agendaItems.length) {
+        const item = meetingState.agendaItems[index];
+        const newDuration = item.durationMinutes + minutesToAdd;
+
+        // Don't allow duration to go below 5 minutes
+        if (newDuration >= 5) {
+            item.durationMinutes = newDuration;
+
+            // If this is the current item, update the time remaining
+            if (index === meetingState.currentAgendaIndex) {
+                meetingState.agendaTimeRemaining = (item.durationMinutes * 60) - item.timeUsedSeconds;
+                updateAgendaTimerDisplay();
+            }
+
+            saveAgendaToStorage();
+            renderAgendaList();
+            broadcastState();
+        }
+    }
+}
+
 function moveAgendaItemUp(index) {
     if (index > 0) {
         const items = meetingState.agendaItems;
@@ -329,7 +351,10 @@ function renderAgendaList() {
                 </div>
             </div>
             <div class="agenda-item-times">
-                <span>Allocated: ${item.durationMinutes} min</span>
+                <span>Allocated: ${item.durationMinutes} min
+                    <button class="small secondary btn-subtract-time" data-index="${index}" ${item.durationMinutes <= 5 ? 'disabled' : ''}>-5</button>
+                    <button class="small secondary btn-add-time" data-index="${index}">+5</button>
+                </span>
                 <span>Used: <strong class="${isOvertime ? 'danger' : ''}">${usedStr}</strong></span>
                 <span>Remaining: <strong class="${isOvertime ? 'danger' : (remainingSeconds < 60 ? 'warning' : '')}">${isOvertime ? '-' + overtimeStr : remainingStr}</strong></span>
             </div>
@@ -364,6 +389,20 @@ function renderAgendaList() {
         btn.addEventListener('click', (e) => {
             const id = parseInt(e.target.dataset.id);
             removeAgendaItem(id);
+        });
+    });
+
+    container.querySelectorAll('.btn-add-time').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const index = parseInt(e.target.dataset.index);
+            adjustAgendaItemTime(index, 5);
+        });
+    });
+
+    container.querySelectorAll('.btn-subtract-time').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const index = parseInt(e.target.dataset.index);
+            adjustAgendaItemTime(index, -5);
         });
     });
 }
