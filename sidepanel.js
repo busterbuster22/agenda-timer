@@ -359,14 +359,19 @@ function startAgendaTimer() {
         alert('Please select an agenda item first');
         return;
     }
-    
+
     const currentItem = meetingState.agendaItems[meetingState.currentAgendaIndex];
     if (!currentItem.startedAt) {
         currentItem.startedAt = Date.now();
     }
-    
+
     meetingState.agendaTimerState = 'running';
-    
+
+    // Clear any existing interval to prevent multiple timers
+    if (agendaTimerInterval) {
+        clearInterval(agendaTimerInterval);
+    }
+
     agendaTimerInterval = setInterval(() => {
         const currentItem = meetingState.agendaItems[meetingState.currentAgendaIndex];
         
@@ -426,7 +431,12 @@ function updateAgendaTimerDisplay() {
 // Speaker Timer Functions
 function startSpeakerTimer() {
     meetingState.speakerTimerState = 'running';
-    
+
+    // Clear any existing interval to prevent multiple timers
+    if (speakerTimerInterval) {
+        clearInterval(speakerTimerInterval);
+    }
+
     speakerTimerInterval = setInterval(() => {
         meetingState.speakerTimeElapsed++;
         updateSpeakerTimerDisplay();
@@ -465,20 +475,20 @@ function formatTime(seconds) {
 
 // Local Storage Functions
 function saveAgendaToStorage() {
-    localStorage.setItem('greens-agenda', JSON.stringify(meetingState.agendaItems));
-    localStorage.setItem('greens-meeting-times', JSON.stringify({
+    localStorage.setItem('agenda-timer-agenda', JSON.stringify(meetingState.agendaItems));
+    localStorage.setItem('agenda-timer-meeting-times', JSON.stringify({
         startTime: meetingState.meetingStartTime,
         endTime: meetingState.meetingEndTime
     }));
 }
 
 function loadAgendaFromStorage() {
-    const saved = localStorage.getItem('greens-agenda');
+    const saved = localStorage.getItem('agenda-timer-agenda');
     if (saved) {
         meetingState.agendaItems = JSON.parse(saved);
     }
-    
-    const times = localStorage.getItem('greens-meeting-times');
+
+    const times = localStorage.getItem('agenda-timer-meeting-times');
     if (times) {
         const parsed = JSON.parse(times);
         meetingState.meetingStartTime = parsed.startTime;
