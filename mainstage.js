@@ -129,8 +129,8 @@ function updateCircularTimers() {
     const seconds = totalSeconds % 60;
     meetingTimerDisplay.textContent = `${hours}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
     
-    // Update meeting time circle (fills up over 60 minutes)
-    const meetingProgress = Math.min(totalSeconds / 3600, 1); // 60 minutes = 3600 seconds
+    // Update meeting time circle (fills up over 1 hour)
+    const meetingProgress = Math.min(totalSeconds / 3600, 1); // 1 hour = 3600 seconds
     const meetingOffset = CIRCLE_CIRCUMFERENCE * (1 - meetingProgress);
     meetingProgressCircle.style.strokeDashoffset = meetingOffset;
     

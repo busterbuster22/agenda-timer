@@ -2,13 +2,13 @@
   "oauthScopes": [],
   "addOns": {
     "meet": {
-      "sidePanelUrl": "https://YOUR-DEPLOYED-URL/sidepanel.html",
-      "mainStageUrl": "https://YOUR-DEPLOYED-URL/mainstage.html",
+      "sidePanelUrl": "https://agenda-timer.politiapps.org/sidepanel.html",
+      "mainStageUrl": "https://agenda-timer.politiapps.org/mainstage.html",
       "supportsAddonActivation": true
     },
     "common": {
       "name": "Agenda Timer",
-      "logoUrl": "https://YOUR-DEPLOYED-URL/icon.png",
+      "logoUrl": "https://agenda-timer.politiapps.org/icon.png",
       "useLocaleFromApp": true
     }
   }
