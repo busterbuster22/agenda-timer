@@ -1,7 +1,6 @@
 // Side Panel JavaScript - Facilitator Controls
 
 let sidePanelClient;
-let coDoingClient;
 let meetingState = {
     agendaItems: [],
     currentAgendaIndex: -1,
@@ -27,17 +26,7 @@ async function initializeSidePanel() {
 
         sidePanelClient = await session.createSidePanelClient();
 
-        // Create CoDoingClient for broadcasting state to all participants
-        coDoingClient = await session.createCoDoingClient({
-            activityTitle: "Agenda Timer",
-            onCoDoingStateChanged(coDoingState) {
-                // This callback handles state updates from other participants
-                // For this app, only the facilitator broadcasts, so we don't need to process incoming states
-                console.log('Received CoDoing state update');
-            }
-        });
-
-        console.log('Side panel initialized with CoDoing client');
+        console.log('Side panel initialized');
 
         // Start broadcasting state updates
         startStateBroadcast();
@@ -89,18 +78,10 @@ async function startMainStage() {
     }
 }
 
-// Broadcast state updates to main stage using CoDoing API
+// Broadcast state updates to main stage via localStorage
 function broadcastState() {
-    if (coDoingClient) {
-        try {
-            // Convert state to Uint8Array as required by broadcastStateUpdate
-            const stateString = JSON.stringify(meetingState);
-            const stateBytes = new TextEncoder().encode(stateString);
-            coDoingClient.broadcastStateUpdate(stateBytes);
-        } catch (err) {
-            console.error('Failed to broadcast state:', err);
-        }
-    }
+    // Save to localStorage so mainstage can read it
+    localStorage.setItem('meeting-state', JSON.stringify(meetingState));
 }
 
 function startStateBroadcast() {

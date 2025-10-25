@@ -1,5 +1,4 @@
 let mainStageClient;
-let coDoingClient;
 let currentState = {
     agendaItems: [],
     currentAgendaIndex: -1,
@@ -23,30 +22,41 @@ async function initializeMainStage() {
         });
 
         mainStageClient = await session.createMainStageClient();
+        console.log('Main stage initialized');
 
-        // Create CoDoingClient to receive state updates from side panel
-        coDoingClient = await session.createCoDoingClient({
-            activityTitle: "Agenda Timer",
-            onCoDoingStateChanged(coDoingState) {
-                console.log('Received CoDoing state update');
-                try {
-                    // Convert Uint8Array back to JSON string and parse
-                    const stateString = new TextDecoder().decode(coDoingState.bytes);
-                    const newState = JSON.parse(stateString);
-                    updateState(newState);
-                } catch (error) {
-                    console.error('Failed to parse CoDoing state:', error);
-                }
+        // Load initial state from localStorage
+        loadStateFromStorage();
+
+        // Listen for localStorage changes from side panel
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'meeting-state' && e.newValue) {
+                const newState = JSON.parse(e.newValue);
+                updateState(newState);
             }
         });
 
-        console.log('Main stage initialized with CoDoing client');
+        // Also poll localStorage regularly as backup
+        setInterval(() => {
+            loadStateFromStorage();
+        }, 500);
 
         // Start the display update interval
         setInterval(updateDisplay, 1000);
 
     } catch (error) {
         console.error('Failed to initialize main stage:', error);
+    }
+}
+
+function loadStateFromStorage() {
+    const savedState = localStorage.getItem('meeting-state');
+    if (savedState) {
+        try {
+            const newState = JSON.parse(savedState);
+            updateState(newState);
+        } catch (error) {
+            console.error('Failed to parse saved state:', error);
+        }
     }
 }
 
