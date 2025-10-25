@@ -1,6 +1,7 @@
 // Side Panel JavaScript - Facilitator Controls
 
 let sidePanelClient;
+let coDoingClient;
 let meetingState = {
     agendaItems: [],
     currentAgendaIndex: -1,
@@ -23,26 +24,36 @@ async function initializeSidePanel() {
         const session = await meet.addon.createAddonSession({
             cloudProjectNumber: '879397453091'
         });
-        
+
         sidePanelClient = await session.createSidePanelClient();
-        
-        console.log('Side panel initialized');
-        
+
+        // Create CoDoingClient for broadcasting state to all participants
+        coDoingClient = await session.createCoDoingClient({
+            activityTitle: "Agenda Timer",
+            onCoDoingStateChanged(coDoingState) {
+                // This callback handles state updates from other participants
+                // For this app, only the facilitator broadcasts, so we don't need to process incoming states
+                console.log('Received CoDoing state update');
+            }
+        });
+
+        console.log('Side panel initialized with CoDoing client');
+
         // Start broadcasting state updates
         startStateBroadcast();
-        
+
         // Set up event listeners
         setupEventListeners();
-        
+
         // Load saved agenda items from localStorage
         loadAgendaFromStorage();
         renderAgendaList();
-        
+
         // Start meeting timer if meeting has started
         if (meetingState.meetingStartTime) {
             startMeetingTimer();
         }
-        
+
     } catch (error) {
         console.error('Failed to initialize side panel:', error);
     }
@@ -78,13 +89,17 @@ async function startMainStage() {
     }
 }
 
-// Broadcast state updates to main stage
+// Broadcast state updates to main stage using CoDoing API
 function broadcastState() {
-    // Broadcast state to main stage using the SDK
-    if (sidePanelClient) {
-        sidePanelClient.setActivityState({
-            additionalData: JSON.stringify(meetingState)
-        }).catch(err => console.error('Failed to broadcast state:', err));
+    if (coDoingClient) {
+        try {
+            // Convert state to Uint8Array as required by broadcastStateUpdate
+            const stateString = JSON.stringify(meetingState);
+            const stateBytes = new TextEncoder().encode(stateString);
+            coDoingClient.broadcastStateUpdate(stateBytes);
+        } catch (err) {
+            console.error('Failed to broadcast state:', err);
+        }
     }
 }
 
@@ -211,6 +226,28 @@ function removeAgendaItem(id) {
     broadcastState();
 }
 
+function adjustAgendaItemTime(index, minutesToAdd) {
+    if (index >= 0 && index < meetingState.agendaItems.length) {
+        const item = meetingState.agendaItems[index];
+        const newDuration = item.durationMinutes + minutesToAdd;
+
+        // Don't allow duration to go below 5 minutes
+        if (newDuration >= 5) {
+            item.durationMinutes = newDuration;
+
+            // If this is the current item, update the time remaining
+            if (index === meetingState.currentAgendaIndex) {
+                meetingState.agendaTimeRemaining = (item.durationMinutes * 60) - item.timeUsedSeconds;
+                updateAgendaTimerDisplay();
+            }
+
+            saveAgendaToStorage();
+            renderAgendaList();
+            broadcastState();
+        }
+    }
+}
+
 function moveAgendaItemUp(index) {
     if (index > 0) {
         const items = meetingState.agendaItems;
@@ -314,7 +351,10 @@ function renderAgendaList() {
                 </div>
             </div>
             <div class="agenda-item-times">
-                <span>Allocated: ${item.durationMinutes} min</span>
+                <span>Allocated: ${item.durationMinutes} min
+                    <button class="small secondary btn-subtract-time" data-index="${index}" ${item.durationMinutes <= 5 ? 'disabled' : ''}>-5</button>
+                    <button class="small secondary btn-add-time" data-index="${index}">+5</button>
+                </span>
                 <span>Used: <strong class="${isOvertime ? 'danger' : ''}">${usedStr}</strong></span>
                 <span>Remaining: <strong class="${isOvertime ? 'danger' : (remainingSeconds < 60 ? 'warning' : '')}">${isOvertime ? '-' + overtimeStr : remainingStr}</strong></span>
             </div>
@@ -349,6 +389,20 @@ function renderAgendaList() {
         btn.addEventListener('click', (e) => {
             const id = parseInt(e.target.dataset.id);
             removeAgendaItem(id);
+        });
+    });
+
+    container.querySelectorAll('.btn-add-time').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const index = parseInt(e.target.dataset.index);
+            adjustAgendaItemTime(index, 5);
+        });
+    });
+
+    container.querySelectorAll('.btn-subtract-time').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            const index = parseInt(e.target.dataset.index);
+            adjustAgendaItemTime(index, -5);
         });
     });
 }

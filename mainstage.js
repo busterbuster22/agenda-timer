@@ -1,4 +1,5 @@
 let mainStageClient;
+let coDoingClient;
 let currentState = {
     agendaItems: [],
     currentAgendaIndex: -1,
@@ -20,26 +21,30 @@ async function initializeMainStage() {
         const session = await window.meet.addon.createAddonSession({
             cloudProjectNumber: "879397453091"
         });
-        
+
         mainStageClient = await session.createMainStageClient();
-        console.log('Main stage initialized');
-        
-        // Listen for state updates from side panel
-        mainStageClient.on('activityStateChange', (activityState) => {
-            console.log('Received state update:', activityState);
-            if (activityState && activityState.additionalData) {
+
+        // Create CoDoingClient to receive state updates from side panel
+        coDoingClient = await session.createCoDoingClient({
+            activityTitle: "Agenda Timer",
+            onCoDoingStateChanged(coDoingState) {
+                console.log('Received CoDoing state update');
                 try {
-                    const newState = JSON.parse(activityState.additionalData);
+                    // Convert Uint8Array back to JSON string and parse
+                    const stateString = new TextDecoder().decode(coDoingState.bytes);
+                    const newState = JSON.parse(stateString);
                     updateState(newState);
                 } catch (error) {
-                    console.error('Failed to parse state:', error);
+                    console.error('Failed to parse CoDoing state:', error);
                 }
             }
         });
-        
+
+        console.log('Main stage initialized with CoDoing client');
+
         // Start the display update interval
         setInterval(updateDisplay, 1000);
-        
+
     } catch (error) {
         console.error('Failed to initialize main stage:', error);
     }
